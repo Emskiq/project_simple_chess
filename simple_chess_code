@@ -1,0 +1,34 @@
+#include <iostream>
+#include <cstdlib>
+
+using namespace std;
+
+void showStartMenu() {
+	unsigned int inputOption = 0;
+	cout << "\t\t\tSimple Chess:" << endl;
+	cout << "\t\t1)Start a new game" << endl;
+	cout << "\t\t2)Change table size (current size: 8x8)" << endl;
+	cout << "\t\t3)Exit" << endl;
+	cout << "\t\tChoose option 1,2,3: "; cin >> inputOption;
+	switch (inputOption)
+	{
+	case 1: {
+		//startTheGame();
+	}
+	case 2: {
+		//tableSize();
+	}
+	case 3:{
+		cout << endl;
+		cout << "\t\t\tThank you for playing!";
+		exit(0);
+	}
+	default:
+		break;
+	}
+}
+
+int main()
+{
+	showStartMenu();
+}
