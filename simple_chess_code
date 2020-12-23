@@ -1,15 +1,52 @@
 #include <iostream>
 #include <cstdlib>
-
+#include <conio.h>
+#include <stdlib.h>
+#include <ctime>
+#include <windows.h>
 using namespace std;
+//        _                    _               _                     \n
+//       (_)                  | |             | |                    \n
+//   ___  _  _ __ ___   _ __  | |  ___    ___ | |__    ___  ___  ___ \n
+//  / __|| || '_ ` _\\ | '_\\ | | / _\\  / __|| '_\\  / _ \/ __|/ __|\n
+// \\__ \| || | | | | || |_) || ||  __/ | (__ | | | ||  __/\\__\\\\__\\\n
+//  |___/|_||_| |_| |_|| .__/ |_|\\___| \\___||_| |_|\\___||___/|___/\n
+//                     | |                                           
+//                     |_|                                           
+//   +
+//  ^^^
+//  ( )
+//  ) (
+// (   )
+//  ) (
+// (   )
+//[_____]
 
+//  |_|_|     
+//   | |     
+//   ) (      
+//   ) (      
+//  (   )   
+// [_____] 
 void showStartMenu() {
 	unsigned int inputOption = 0;
-	cout << "\t\t\tSimple Chess:" << endl;
-	cout << "\t\t1)Start a new game" << endl;
-	cout << "\t\t2)Change table size (current size: 8x8)" << endl;
-	cout << "\t\t3)Exit" << endl;
-	cout << "\t\tChoose option 1,2,3: "; cin >> inputOption;
+	char c;
+	cout << "  \t           _                    _               _                     " << endl;
+	cout << "  \t          (_)                  | |             | |                    " << endl;
+	cout << "  \t      ___  _  _ __ ___   _ __  | |  ___    ___ | |__    ___  ___  ___ " << endl;
+	cout << "  \t     / __|| || '_ ` _ \\ | '_ \\ | | / _ \\  / __|| '_ \\  / _ \\/ __|/ __|" << endl;
+	cout << "  \t     \\__ \\| || | | | | || |_) || ||  __/ | (__ | | | ||  __/\\__ \\\\__ \\" << endl;
+	cout << "\t     |___/|_||_| |_| |_|| .__/ |_| \\___|  \\___||_| |_| \\___||___/|___/" << endl;
+	cout << "\t   +                    |_|                                           " << endl;
+	cout << "\t  ^^^                                              \t             |_|_|" << endl;
+	cout << "\t  ( )\t\t|========================================|\t      | | " << endl;
+	cout << "\t  ) (\t\t|1.Start a new game                      |\t      ) (" << endl;
+	cout << "\t (   )\t\t|2.Change table size (current size: 8x8) |\t      ) ( " << endl;
+	cout << "\t  ) (\t\t|3.Exit                                  |\t     (   )" << endl;
+	cout << "\t (   )\t\t|========================================|\t    [_____]" << endl;
+	cout << "\t[_____]\t\tChoose option 1,2,3:";
+	c = _getche();
+	inputOption = c - '0';
 	switch (inputOption)
 	{
 	case 1: {
@@ -18,10 +55,12 @@ void showStartMenu() {
 	case 2: {
 		//tableSize();
 	}
-	case 3:{
-		cout << endl;
-		cout << "\t\t\tThank you for playing!";
-		exit(0);
+	case 3: {
+		system("cls");
+		cout <<"\n\n\n\n\n";
+		cout << "\t\t\t\tThank you for playing!" << endl;
+		Sleep(700);
+		//system("pause");
 	}
 	default:
 		break;
