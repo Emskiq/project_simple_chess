@@ -3,31 +3,44 @@
 #include <conio.h>
 #include <stdlib.h>
 #include <ctime>
-#include <windows.h>
+#include <Windows.h>
+#include <vector>
+#include <iomanip>
+
 using namespace std;
 //        _                    _               _                     \n
 //       (_)                  | |             | |                    \n
 //   ___  _  _ __ ___   _ __  | |  ___    ___ | |__    ___  ___  ___ \n
 //  / __|| || '_ ` _\\ | '_\\ | | / _\\  / __|| '_\\  / _ \/ __|/ __|\n
-// \\__ \| || | | | | || |_) || ||  __/ | (__ | | | ||  __/\\__\\\\__\\\n
+// \\__ \| || | | | | || |_) || ||  __/ | (__ | | | ||  __/ \__\\__\ \n
 //  |___/|_||_| |_| |_|| .__/ |_|\\___| \\___||_| |_|\\___||___/|___/\n
 //                     | |                                           
 //                     |_|                                           
-//   +
-//  ^^^
-//  ( )
-//  ) (
-// (   )
-//  ) (
-// (   )
-//[_____]
+int tableArr[15][15];
+int tableSize = 8;
 
-//  |_|_|     
-//   | |     
-//   ) (      
-//   ) (      
-//  (   )   
-// [_____] 
+void ChangeTableSize();
+void showStartMenu();
+void drawChessTable();
+void startTheGame();
+
+int main()
+{
+	showStartMenu();
+}
+void ChangeTableSize() {
+	int tempSize = 0;
+	cout << "\n\n\n\n\n\n \t\t\tChoose a table size between 6-15:";
+	cin >> tempSize;
+	while (tempSize > 15 || tempSize < 6) {
+		system("cls");
+		cout << "\n\n\n\n\n\n \t\t\tPlease choose a number between 6 and 15:";
+		cin >> tempSize;
+	}
+	tableSize = tempSize;
+	system("cls");
+	showStartMenu();
+}
 void showStartMenu() {
 	unsigned int inputOption = 0;
 	char c;
@@ -39,35 +52,73 @@ void showStartMenu() {
 	cout << "\t     |___/|_||_| |_| |_|| .__/ |_| \\___|  \\___||_| |_| \\___||___/|___/" << endl;
 	cout << "\t   +                    |_|                                           " << endl;
 	cout << "\t  ^^^                                              \t             |_|_|" << endl;
-	cout << "\t  ( )\t\t|========================================|\t      | | " << endl;
-	cout << "\t  ) (\t\t|1.Start a new game                      |\t      ) (" << endl;
-	cout << "\t (   )\t\t|2.Change table size (current size: 8x8) |\t      ) ( " << endl;
-	cout << "\t  ) (\t\t|3.Exit                                  |\t     (   )" << endl;
-	cout << "\t (   )\t\t|========================================|\t    [_____]" << endl;
+	cout << "\t  ( )\t\t|=========================================|\t      | | " << endl;
+	cout << "\t  ) (\t\t|1.Start a new game                       |\t      ) (" << endl;
+	cout << setw(50) << "\t (   )\t\t|2.Change table size (current size " << setw(2) << tableSize << "x" << setw(2) << tableSize << ") |\t      ) ( " << endl;
+	cout << "\t  ) (\t\t|3.Exit                                   |\t     (   )" << endl;
+	cout << "\t (   )\t\t|=========================================|\t    [_____]" << endl;
 	cout << "\t[_____]\t\tChoose option 1,2,3:";
 	c = _getche();
 	inputOption = c - '0';
 	switch (inputOption)
 	{
 	case 1: {
-		//startTheGame();
+		startTheGame();
+		break;
 	}
 	case 2: {
-		//tableSize();
+		system("cls");
+		ChangeTableSize();
+		break;
 	}
 	case 3: {
 		system("cls");
-		cout <<"\n\n\n\n\n";
-		cout << "\t\t\t\tThank you for playing!" << endl;
-		Sleep(700);
-		//system("pause");
-	}
-	default:
+		cout << "\n\n\n\n\n\t\t\t\t|========================|" << endl;;
+		cout << "\t\t\t\t| Thank you for playing! |" << endl;
+		cout << "\t\t\t\t|========================|";
+		Sleep(900);
 		break;
 	}
+	default: {
+	}
+	}
 }
+void startTheGame() {
+	system("cls");
+	drawChessTable();
+}
+void drawChessTable() {
 
-int main()
-{
-	showStartMenu();
+	int i, j;
+	cout << "\t\t\t     " << "A";//5 space chars
+	char c = 66;
+	for (i = 0; i <= tableSize-2; ++i)
+		cout << "    " << char(c + i);//4 space chars
+
+	cout << endl;
+	cout << "\t\t\t  |----|";
+
+	for (i = 2; i <= tableSize; ++i)
+		cout << "----|";
+
+	cout << endl;
+
+	for (i = 1; i <= tableSize; ++i)
+	{
+		cout <<"\t\t\t"<< setw(2) << i << "|";
+
+		for (j = 1; j <= tableSize; ++j) {
+			if(i==6&&j==3)cout<< " YK |";	//i - redovete(chislata)    j - kolonite(bukvite)
+			else cout << "    |";			//tuka vkarvash danni kato mahnesh 2 space-a
+		}
+		cout << endl;
+		cout << "\t\t\t -|----";
+
+		for (j = 2; j <= tableSize-1; ++j)
+			cout << "|----";
+
+		cout << "|----|";
+		cout << endl;
+
+	}
 }
