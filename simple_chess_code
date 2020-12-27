@@ -1,34 +1,217 @@
 #include <iostream>
 #include <cstdlib>
+#include <conio.h>
+#include <stdlib.h>
+#include <ctime>
+#include<Windows.h>
+#include <vector>
+#include <iomanip>
 
 using namespace std;
+//        _                    _               _                     \n
+//       (_)                  | |             | |                    \n
+//   ___  _  _ __ ___   _ __  | |  ___    ___ | |__    ___  ___  ___ \n
+//  / __|| || '_ ` _\\ | '_\\ | | / _\\  / __|| '_\\  / _ \/ __|/ __|\n
+// \\__ \| || | | | | || |_) || ||  __/ | (__ | | | ||  __/ \__\\__\ \n
+//  |___/|_||_| |_| |_|| .__/ |_|\\___| \\___||_| |_|\\___||___/|___/\n
+//                     | |                                           
+//                     |_|                                           
+int tableArr[15][15];
+int tableSize = 8;
 
-void showStartMenu() {
-	unsigned int inputOption = 0;
-	cout << "\t\t\tSimple Chess:" << endl;
-	cout << "\t\t1)Start a new game" << endl;
-	cout << "\t\t2)Change table size (current size: 8x8)" << endl;
-	cout << "\t\t3)Exit" << endl;
-	cout << "\t\tChoose option 1,2,3: "; cin >> inputOption;
-	switch (inputOption)
-	{
-	case 1: {
-		//startTheGame();
+struct king {
+	int x=1, y=1;					//x-red  y-kolona
+	int possibleXY[8][2] = {};
+	void findPossibleXY() {
+		int tempCounter = 0;
+		for (int i = x - 1; i <= x + 1; i++) {
+			for (int j = y - 1; j <= y + 1; j++) {
+				if (i <= tableSize && j != 0 && j <= tableSize) {
+					if (i != x || j != y) {
+						possibleXY[tempCounter][0] = i;
+						possibleXY[tempCounter][1] = j;
+						tempCounter++;
+					}
+				}
+			}
+		}
 	}
-	case 2: {
-		//tableSize();
+};
+struct rook {
+	int x=1, y=1;					//x-red  y-kolona
+	int possibleXY[31][2] = {};
+	void findPossibleXY() {
+		for (int i = 1; i <= tableSize; i++) {
+			if (i == x)
+				continue;
+			possibleXY[i][0] = i;			//promenqme x
+			possibleXY[i][1] = y;
+		}
+		for (int i = tableSize+1; i <= tableSize*2; i++) {
+			if (i-tableSize == y)
+				continue;
+			possibleXY[i][0] = x;
+			possibleXY[i][1] = i-tableSize;			//promenqme y
+		}
 	}
-	case 3:{
-		cout << endl;
-		cout << "\t\t\tThank you for playing!";
-		exit(0);
-	}
-	default:
-		break;
-	}
-}
+};
+
+void ChangeTableSize();
+void showStartMenu();
+void drawChessTable();
+void startTheGame();
 
 int main()
 {
 	showStartMenu();
+}
+void ChangeTableSize() {
+	int tempSize = 0;
+	cout << "\n\n\n\n\n\n \t\t\tChoose a table size between 6-15:";
+	cin >> tempSize;
+	while (tempSize > 15 || tempSize < 6) {
+		system("cls");
+		cout << "\n\n\n\n\n\n \t\t\tPlease choose a number between 6 and 15:";
+		cin >> tempSize;
+	}
+	tableSize = tempSize;
+	system("cls");
+	showStartMenu();
+}
+void showStartMenu() {
+	unsigned int inputOption = 0;
+	char c;
+	cout << "  \t           _                    _               _                     " << endl;
+	cout << "  \t          (_)                  | |             | |                    " << endl;
+	cout << "  \t      ___  _  _ __ ___   _ __  | |  ___    ___ | |__    ___  ___  ___ " << endl;
+	cout << "  \t     / __|| || '_ ` _ \\ | '_ \\ | | / _ \\  / __|| '_ \\  / _ \\/ __|/ __|" << endl;
+	cout << "  \t     \\__ \\| || | | | | || |_) || ||  __/ | (__ | | | ||  __/\\__ \\\\__ \\" << endl;
+	cout << "\t     |___/|_||_| |_| |_|| .__/ |_| \\___|  \\___||_| |_| \\___||___/|___/" << endl;
+	cout << "\t   +                    |_|                                           " << endl;
+	cout << "\t  ^^^                                              \t             |_|_|" << endl;
+	cout << "\t  ( )\t\t|=========================================|\t      | | " << endl;
+	cout << "\t  ) (\t\t|1.Start a new game                       |\t      ) (" << endl;
+	cout << setw(50) << "\t (   )\t\t|2.Change table size (current size " << setw(2) << tableSize << "x" << setw(2) << tableSize << ") |\t      ) ( " << endl;
+	cout << "\t  ) (\t\t|3.Exit                                   |\t     (   )" << endl;
+	cout << "\t (   )\t\t|=========================================|\t    [_____]" << endl;
+	cout << "\t[_____]\t\tChoose option 1,2,3:";
+	c = _getche();
+	inputOption = c - '0';
+	switch (inputOption)
+	{
+	case 1: {
+		startTheGame();
+		break;
+	}
+	case 2: {
+		system("cls");
+		ChangeTableSize();
+		break;
+	}
+	case 3: {
+		system("cls");
+		cout << "\n\n\n\n\n\t\t\t\t|========================|" << endl;;
+		cout << "\t\t\t\t| Thank you for playing! |" << endl;
+		cout << "\t\t\t\t|========================|";
+		Sleep(900);
+		break;
+	}
+	default: {
+	}
+	}
+}
+king playerKing, compKing;
+rook rook1, rook2;
+void startTheGame() {
+	system("cls");
+	int counter = 0;
+	srand(time(0));
+	int temp=rand();
+	playerKing.x =1+(tableSize/2)+ (rand() % (tableSize/2));
+	playerKing.y =1+ (rand() % tableSize);
+	playerKing.findPossibleXY();
+	while (1) {
+		rook1.x = 1 + (tableSize / 2) + (rand() % (tableSize / 2));
+		rook1.y = 1 + (rand() % tableSize);
+		if (rook1.x != playerKing.x || rook1.y != playerKing.y)break;
+	}
+	rook1.findPossibleXY();
+	while (1) {
+		rook2.x = 1 + (tableSize / 2) + (rand() % (tableSize / 2));
+		rook2.y = 1 + (rand() % tableSize);
+		if ((rook2.x != playerKing.x || rook2.y != playerKing.y)&&(rook2.x!=rook1.x||rook2.y!=rook1.y))
+			break;
+	}
+	rook2.findPossibleXY();
+	while (1){
+		counter=0;
+		compKing.x = 1 + (rand() % (tableSize / 2));
+		compKing.y = 1 + (rand() % tableSize);
+		for (int i = 1; i <= tableSize*2; i++) {
+			if (rook1.possibleXY[i][0] == compKing.x) {
+				if (rook1.possibleXY[i][1] == compKing.y) {
+					counter++;
+					break;
+				}
+			}
+		}
+		if (counter == 1)continue;
+		for (int i = 1; i <= tableSize * 2; i++) {
+			if (rook2.possibleXY[i][0] == compKing.x) {
+				if (rook2.possibleXY[i][1] == compKing.y) {
+					counter++;
+					break;
+				}
+			}
+		}
+		if (counter == 1)continue;
+		for (int i = 0; i <= 7; i++) {
+			if (playerKing.possibleXY[i][0] == compKing.x) {
+				if (playerKing.possibleXY[i][1] == compKing.y) {
+					counter++;
+					break;
+				}
+			}
+		}
+		if (counter == 0)break;
+	}
+	drawChessTable();
+}
+void drawChessTable() {
+
+	int i, j;
+	cout << "\t\t\t     " << "A";
+	char c = 66;
+	for (i = 0; i <= tableSize-2; ++i)
+		cout << "    " << char(c + i);
+
+	cout << endl;
+	cout << "\t\t\t  |----|";
+
+	for (i = 2; i <= tableSize; ++i)
+		cout << "----|";
+
+	cout << endl;
+
+	for (i = 1; i <= tableSize; ++i)
+	{
+		cout <<"\t\t\t"<< setw(2) << i << "|";
+
+		for (j = 1; j <= tableSize; ++j) {
+			if (playerKing.x == i && playerKing.y == j)cout << " YK |";
+			else if (compKing.x == i && compKing.y == j)cout << " CK |";
+			else if (rook1.x == i && rook1.y == j)cout << " R1 |";
+			else if (rook2.x == i && rook2.y == j)cout << " R2 |";
+			else cout << "    |";			//tuka vkarvash danni kato mahnesh 2 space-a
+		}
+		cout << endl;
+		cout << "\t\t\t -|----";
+
+		for (j = 2; j <= tableSize-1; ++j)
+			cout << "|----";
+
+		cout << "|----|";
+		cout << endl;
+
+	}
 }
