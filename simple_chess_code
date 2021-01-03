@@ -3,33 +3,27 @@
 #include <conio.h>
 #include <stdlib.h>
 #include <ctime>
-#include<Windows.h>
+#include <Windows.h>
 #include <vector>
 #include <iomanip>
 #include <string>
 
 using namespace std;
-//        _                    _               _                     \n
-//       (_)                  | |             | |                    \n
-//   ___  _  _ __ ___   _ __  | |  ___    ___ | |__    ___  ___  ___ \n
-//  / __|| || '_ ` _\\ | '_\\ | | / _\\  / __|| '_\\  / _ \/ __|/ __|\n
-// \\__ \| || | | | | || |_) || ||  __/ | (__ | | | ||  __/ \__\\__\ \n
-//  |___/|_||_| |_| |_|| .__/ |_|\\___| \\___||_| |_|\\___||___/|___/\n
-//                     | |                                           
-//                     |_|                                           
+
 int tableArr[15][15];
-int tableSize = 8;
+int tableSize = 8, movesCounter = 0;
 string inputFig = "";
 string inputPos = "";
 bool gameStarted = 1, gameWon = 0, gameLost = 0;
 
 
+
 struct king {
-	int x=1, y=1;					//x-red  y-kolona
-	int possibleXY[8][2] = {};
+	int x=1, y=1;					//x-row  y-column
+	int possibleXY[8][2] = {};		//possible places to move the king
 	void findPossibleXY() {
 		for (int i = 0; i < 7; i++) {
-			possibleXY[i][0] = 0;			//izchistvame posledniq arr
+			possibleXY[i][0] = 0;			//clear last arr of possibleXY
 			possibleXY[i][1] = 0;
 		}
 		int tempCounter = 0;
@@ -37,7 +31,7 @@ struct king {
 			for (int j = y - 1; j <= y + 1; j++) {
 				if (i <= tableSize && j != 0 && j <= tableSize) {
 					if (i != x || j != y) {
-						possibleXY[tempCounter][0] = i;
+						possibleXY[tempCounter][0] = i;					//filling the array
 						possibleXY[tempCounter][1] = j;
 						tempCounter++;
 					}
@@ -48,29 +42,28 @@ struct king {
 };
 
 king playerKing, compKing;
-struct rook;
 
 struct rook {
-	int x=1, y=1;					//x-red  y-kolona
+	int x=1, y=1;					
 	int possibleXY[31][2] = {};
 	void findPossibleXY(rook anotherRook) {
 		for (int i = 0; i < 30; i++) {
 			possibleXY[i][0] = 0;
-			possibleXY[i][1] = 0;			//izchistvame predniq arr
+			possibleXY[i][1] = 0;			
 		}
 		if (x != -1) {
 			for (int i = 1; i <= tableSize; i++) {
 				if (i == x)
 					continue;
-				if (((anotherRook.x > i && anotherRook.x < x) || (anotherRook.x < i && anotherRook.x > x))
-					&& anotherRook.y == y)
+				if (((anotherRook.x > i && anotherRook.x < x) || (anotherRook.x < i && anotherRook.x > x))		//this prevents from
+					&& anotherRook.y == y)																		//jumping over figures
 					continue;
 				if (((playerKing.x >= i && playerKing.x < x) || (playerKing.x <= i && playerKing.x > x))
 					&& playerKing.y == y)
 					continue;
 
-				possibleXY[i][0] = i;			//promenqme x
-				possibleXY[i][1] = y;
+				possibleXY[i][0] = i;												//here we change x (rows)
+				possibleXY[i][1] = y;												//from up to down
 			}
 			for (int i = 1; i <= tableSize; i++) {
 				if (i == y)
@@ -83,14 +76,15 @@ struct rook {
 					continue;
 
 				possibleXY[i + tableSize][0] = x;
-				possibleXY[i + tableSize][1] = i;			//promenqme y
-			}
+				possibleXY[i + tableSize][1] = i;									//here we change y(columns)
+			}																		//from left to right
 		}
 	}
 };
 
 rook rook1, rook2;
 
+//defining the functions
 void ChangeTableSize();
 void showStartMenu();
 void drawChessTable();
@@ -103,7 +97,8 @@ int main()
 {
 	showStartMenu();
 }
-void ChangeTableSize() {
+
+void ChangeTableSize() {				//this is option 2 in menu
 	int tempSize = 0;
 	cout << "\n\n\n\n\n\n \t\t\tChoose a table size between 6-15:";
 	cin >> tempSize;
@@ -137,25 +132,28 @@ void showStartMenu() {
 	inputOption = c - '0';
 	switch (inputOption)
 	{
-	case 1: {
-		startTheGame();
-		break;
-	}
-	case 2: {
-		system("cls");
-		ChangeTableSize();
-		break;
-	}
-	case 3: {
-		system("cls");
-		cout << "\n\n\n\n\n\t\t\t\t|========================|" << endl;;
-		cout << "\t\t\t\t| Thank you for playing! |" << endl;
-		cout << "\t\t\t\t|========================|";
-		Sleep(900);
-		break;
-	}
-	default: {
-	}
+		case 1: {
+			startTheGame();
+			break;
+		}
+		case 2: {
+			system("cls");
+			ChangeTableSize();
+			break;
+		}
+		case 3: {
+			system("cls");
+			cout << "\n\n\n\n\n\t\t\t\t|========================|" << endl;;
+			cout << "\t\t\t\t| Thank you for playing! |" << endl;
+			cout << "\t\t\t\t|========================|";
+			Sleep(900);
+			break;
+		}
+		default: {
+			system("cls");
+			showStartMenu();
+			break;
+		}
 	}
 }
 
@@ -165,7 +163,7 @@ void startTheGame() {
 	srand(time(0));
 	int temp=rand();
 	playerKing.x =1+(tableSize/2)+ (rand() % (tableSize/2));
-	playerKing.y =1+ (rand() % tableSize);
+	playerKing.y =1+ (rand() % tableSize);						
 	playerKing.findPossibleXY();
 	while (1) {
 		rook1.x = 1 + (tableSize / 2) + (rand() % (tableSize / 2));
@@ -224,7 +222,19 @@ top:
 	}
 	gameStarted = 0;
 	if (gameWon) {
-		cout << "Congrats you won!!";
+		system("CLS");
+		cout << "\n\n\n\t\t\t\tNice! You won after " << movesCounter << " moves!\n\n\n";
+		Sleep(1000);
+	}
+	else if (gameLost) {
+		system("CLS");
+		cout << "\n\n\n\t\t\t\tyikes, You lost after " << movesCounter << " moves!\n\n\n";
+		Sleep(1000);
+	}
+	else if (rook1.x==-1&&rook2.x==-1) {
+		system("CLS");
+		cout << "\n\n\n\t\t\t\tEqual, after " << movesCounter << " moves!\n\n\n";
+		Sleep(1000);
 	}
 	else {
 		cout << "\t\t\t   Select a figure (YK/R1/R2):"; cin >> inputFig;
@@ -234,7 +244,7 @@ top:
 			cout << "\t\t\t   Select a position:"; cin >> inputPos;
 		top2:
 			if (validateInput2()) {
-
+				movesCounter++;
 				goto top;
 			}
 			else {
@@ -273,7 +283,7 @@ void drawChessTable() {
 			else if (compKing.x == i && compKing.y == j)cout << " CK |";
 			else if (rook1.x == i && rook1.y == j)cout << " R1 |";
 			else if (rook2.x == i && rook2.y == j)cout << " R2 |";
-			else cout << "    |";			//tuka vkarvash danni kato mahnesh 2 space-a
+			else cout << "    |";
 		}
 		cout << endl;
 		cout << "\t\t\t -|----";
@@ -371,6 +381,8 @@ void compMove() {
 	
 	int tempCounter = 0;
 	bool compMove = 0;
+
+	//first check if it can take a figure
 	for (int i = 0; i <= 7; i++) {
 		if (compKing.possibleXY[i][0] == playerKing.x && compKing.possibleXY[i][1] == playerKing.y) {
 			compKing.possibleXY[i][0] = playerKing.x;
@@ -433,8 +445,9 @@ void compMove() {
 			compMove = 1;
 		}
 	}
+	//if not taken figure chek for possible places
 	if (!compMove) {
-		//proverka za pozicii za otmestvane
+
 		for (int i = 0; i <= 7; i++) {
 			if (compKing.possibleXY[i][0] == rook1.x && compKing.possibleXY[i][1] == rook1.y) {
 				compKing.possibleXY[i][0] = 0;
