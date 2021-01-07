@@ -2,9 +2,7 @@
 #include <cstdlib>
 #include <conio.h>
 #include <stdlib.h>
-#include <ctime>
 #include <Windows.h>
-#include <vector>
 #include <iomanip>
 #include <string>
 
@@ -89,26 +87,12 @@ void ChangeTableSize();
 void showStartMenu();
 void drawChessTable();
 void startTheGame();
-bool validateInput1();
-bool validateInput2();
+bool validateInputFig();
+bool validateInputPos();
 void compMove();
 
 int main()
 {
-	showStartMenu();
-}
-
-void ChangeTableSize() {				//this is option 2 in menu
-	int tempSize = 0;
-	cout << "\n\n\n\n\n\n \t\t\tChoose a table size between 6-15:";
-	cin >> tempSize;
-	while (tempSize > 15 || tempSize < 6) {
-		system("cls");
-		cout << "\n\n\n\n\n\n \t\t\tPlease choose a number between 6 and 15:";
-		cin >> tempSize;
-	}
-	tableSize = tempSize;
-	system("cls");
 	showStartMenu();
 }
 void showStartMenu() {
@@ -132,32 +116,46 @@ void showStartMenu() {
 	inputOption = c - '0';
 	switch (inputOption)
 	{
-		case 1: {
-			startTheGame();
-			break;
-		}
-		case 2: {
-			system("cls");
-			ChangeTableSize();
-			break;
-		}
-		case 3: {
-			system("cls");
-			cout << "\n\n\n\n\n\t\t\t\t|========================|" << endl;;
-			cout << "\t\t\t\t| Thank you for playing! |" << endl;
-			cout << "\t\t\t\t|========================|";
-			Sleep(900);
-			break;
-		}
-		default: {
-			system("cls");
-			showStartMenu();
-			break;
-		}
+	case 1: {
+		startTheGame();
+		break;
+	}
+	case 2: {
+		system("cls");
+		ChangeTableSize();
+		break;
+	}
+	case 3: {
+		system("cls");
+		cout << "\n\n\n\n\n\t\t\t\t|========================|" << endl;;
+		cout << "\t\t\t\t| Thank you for playing! |" << endl;
+		cout << "\t\t\t\t|========================|";
+		Sleep(900);
+		break;
+	}
+	default: {
+		system("cls");
+		showStartMenu();
+		break;
+	}
 	}
 }
 
-void startTheGame() {
+void ChangeTableSize() {				//this is option 2 in menu
+	int tempSize = 0;
+	cout << "\n\n\n\n\n\n \t\t\tChoose a table size between 6-15:";
+	cin >> tempSize;
+	while (tempSize > 15 || tempSize < 6) {
+		system("cls");
+		cout << "\n\n\n\n\n\n \t\t\tPlease choose a number between 6 and 15:";
+		cin >> tempSize;
+	}
+	tableSize = tempSize;
+	system("cls");
+	showStartMenu();
+}
+
+void startTheGame() {		//option 1 in the menu
 	system("cls");
 	int counter = 0;
 	srand(time(0));
@@ -211,6 +209,8 @@ void startTheGame() {
 		if (counter == 0)break;
 	}
 top:
+	inputFig = "";
+	inputPos = "";
 	rook1.findPossibleXY(rook2);
 	playerKing.findPossibleXY();
 	rook2.findPossibleXY(rook1);
@@ -223,27 +223,40 @@ top:
 	gameStarted = 0;
 	if (gameWon) {
 		system("CLS");
-		cout << "\n\n\n\t\t\t\tNice! You won after " << movesCounter << " moves!\n\n\n";
-		Sleep(1000);
+		cout << "\n\n\n\t\t\t\t----=======================----" << endl;
+		cout << "\t\t\t\t Nice! You won after " << movesCounter << " moves!"<<endl;
+		cout << "\t\t\t\t----=======================----" << endl;
+		Sleep(1500);
+		system("cls");
+		showStartMenu();
 	}
 	else if (gameLost) {
 		system("CLS");
-		cout << "\n\n\n\t\t\t\tyikes, You lost after " << movesCounter << " moves!\n\n\n";
-		Sleep(1000);
+		cout << "\n\n\n\t\t\t\t----=======================----" << endl;
+		cout << "\t\t\t\t Yieks! You lost after " << movesCounter << " moves!" << endl;
+		cout << "\t\t\t\t----=======================----" << endl;
+		Sleep(1500);
+		system("cls");
+		showStartMenu();
 	}
 	else if (rook1.x==-1&&rook2.x==-1) {
 		system("CLS");
-		cout << "\n\n\n\t\t\t\tEqual, after " << movesCounter << " moves!\n\n\n";
-		Sleep(1000);
+		cout << "\n\n\n\t\t\t\t----=======================----" << endl;
+		cout << "\t\t\t\t      Equal after " << movesCounter << " moves!" << endl;
+		cout << "\t\t\t\t----=======================----" << endl;
+		Sleep(1500);		
+		system("cls");
+		showStartMenu();
 	}
+
 	else {
 		cout << "\t\t\t   Select a figure (YK/R1/R2):"; cin >> inputFig;
 
 	top1:
-		if (validateInput1()) {
+		if (validateInputFig()) {
 			cout << "\t\t\t   Select a position:"; cin >> inputPos;
 		top2:
-			if (validateInput2()) {
+			if (validateInputPos()) {
 				movesCounter++;
 				goto top;
 			}
@@ -253,7 +266,7 @@ top:
 			}
 		}
 		else {
-			cout << "\t\t\t   Select correct figure (YK/R1/R2):"; cin >> inputFig;
+			cout << "\t\t\t   Select correct figure:"; cin >> inputFig;
 			goto top1;
 		}
 	}
@@ -297,7 +310,7 @@ void drawChessTable() {
 	}
 }
 
-bool validateInput1() {
+bool validateInputFig() {
 	if (inputFig.length() != 2)return 0;
 	else {
 		if (inputFig[0] >= 97 && inputFig[0] <= 122)
@@ -305,21 +318,28 @@ bool validateInput1() {
 		if (inputFig[1] >= 97 && inputFig[1] <= 122)
 			inputFig[1] = inputFig[1] - 32;
 		
-		if (inputFig == "YK" || inputFig == "R1" || inputFig == "R2")
-			return true;
+		if (inputFig == "YK")return true;
+		else if (inputFig == "R1" && rook1.x != -1)return true;
+		else if (inputFig == "R2" && rook2.x != -1)return true;
 		else
 			return false;
 	}
 }
-bool validateInput2() {
+bool validateInputPos() {
 	int inputX = 0, inputY = 0;
-	if (inputPos.length() != 2)return 0;
+	if (inputPos.length() > 3)return 0;
 	else {
 		if (inputPos[0] >= 97 && inputPos[0] <= 122)
 			inputPos[0] = inputPos[0] - 32;
-		if (inputPos[0] >= 65 && inputPos[0] <= 90 && inputPos[1] >= 49 && inputPos[1] <= 57) {
+		if (inputPos[1] >= 49 && inputPos[1] < 57 && inputPos[2] == NULL) {
+			inputY = inputPos[0] - '@';
 			inputX = inputPos[1] - '0';
-			inputY = inputPos[0] - 64;
+		}
+		else if (tableSize > 10 && inputPos[1] >= 49 && inputPos[1] < 57 && inputPos[2] >= 49 && inputPos[2] < 57) {
+			inputY = inputPos[0] - '@';
+			inputX = (inputPos[1] - '0') * 10 + (inputPos[2] - '0');
+		}
+		if(inputY>=1&&inputY<=tableSize&&inputX>=1&&inputX<=tableSize){
 			bool moveSucc = 0;
 			if (inputFig == "YK") {
 				for (int i = 0; i <= 7; i++) {
@@ -382,7 +402,7 @@ void compMove() {
 	int tempCounter = 0;
 	bool compMove = 0;
 
-	//first check if it can take a figure
+	//first check if the king can take a figure
 	for (int i = 0; i <= 7; i++) {
 		if (compKing.possibleXY[i][0] == playerKing.x && compKing.possibleXY[i][1] == playerKing.y) {
 			compKing.possibleXY[i][0] = playerKing.x;
@@ -447,7 +467,7 @@ void compMove() {
 	}
 	//if not taken figure chek for possible places
 	if (!compMove) {
-
+		//first you cannot go over a rook
 		for (int i = 0; i <= 7; i++) {
 			if (compKing.possibleXY[i][0] == rook1.x && compKing.possibleXY[i][1] == rook1.y) {
 				compKing.possibleXY[i][0] = 0;
@@ -476,7 +496,7 @@ void compMove() {
 			}
 		}
 		for (int i = 0; i <= 7; i++) {
-			for (int j = 1; j <= 7; j++) {
+			for (int j = 0; j <= 7; j++) {
 				if (compKing.possibleXY[i][0] == playerKing.possibleXY[j][0] && compKing.possibleXY[i][1] == playerKing.possibleXY[j][1]) {
 					compKing.possibleXY[i][0] = 0;
 					compKing.possibleXY[i][1] = 0;
@@ -485,18 +505,20 @@ void compMove() {
 		}
 
 		for (int i = 0; i <= 7; i++) {
-			if (compKing.possibleXY[i][0] != 0)
+			if (compKing.possibleXY[i][0] != 0 && compKing.possibleXY[i][1] != 0)
 				choiseCounter++;
 		}
 		if (choiseCounter == 0)
 			gameWon = 1;
 		else {
+			//getting a random movement
 			srand(time(NULL));
 			int temp = 1 + rand() % 7;
 			if (compKing.possibleXY[temp][0] != 0) {
 				compKing.x = compKing.possibleXY[temp][0];
 				compKing.y = compKing.possibleXY[temp][1];
 			}
+			//if not just move to the first possible place
 			else {
 				for (int i = 0; i <= 7; i++) {
 					if (compKing.possibleXY[i][0] != 0) {
