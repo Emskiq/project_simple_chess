@@ -1,4 +1,19 @@
-﻿#include <iostream>
+﻿/**
+*  
+* Solution to course project # 9
+* Introduction to programming course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2020/2021
+*
+* @author Emil Tsanev
+* @idnumber 62620
+* @compiler VC
+*
+* <The main cpp file>
+*
+*/
+
+#include <iostream>
 #include <cstdlib>
 #include <conio.h>
 #include <stdlib.h>
@@ -129,8 +144,10 @@ void showStartMenu() {
 		system("cls");
 		cout << "\n\n\n\n\n\t\t\t\t|========================|" << endl;;
 		cout << "\t\t\t\t| Thank you for playing! |" << endl;
-		cout << "\t\t\t\t|========================|";
+		cout << "\t\t\t\t|========================|" << endl;
 		Sleep(900);
+		cout << "\n\n\t\t\t\t";
+		system("pause");
 		break;
 	}
 	default: {
@@ -226,6 +243,8 @@ top:
 		cout << "\n\n\n\t\t\t\t----=======================----" << endl;
 		cout << "\t\t\t\t Nice! You won after " << movesCounter << " moves!"<<endl;
 		cout << "\t\t\t\t----=======================----" << endl;
+		gameStarted = 1;
+		gameWon = 0;
 		Sleep(1800);
 		system("cls");
 		showStartMenu();
@@ -235,6 +254,8 @@ top:
 		cout << "\n\n\n\t\t\t\t----=======================----" << endl;
 		cout << "\t\t\t\t Yieks! You lost after " << movesCounter << " moves!" << endl;
 		cout << "\t\t\t\t----=======================----" << endl;
+		gameStarted = 1;
+		gameLost = 0;
 		Sleep(1800);
 		system("cls");
 		showStartMenu();
@@ -244,13 +265,14 @@ top:
 		cout << "\n\n\n\t\t\t\t----=======================----" << endl;
 		cout << "\t\t\t\t      Equal after " << movesCounter << " moves!" << endl;
 		cout << "\t\t\t\t----=======================----" << endl;
+		gameStarted = 1;
 		Sleep(1800);		
 		system("cls");
 		showStartMenu();
 	}
 
 	else {
-		cout << "\t\t\t   Select a figure (YK/R1/R2):"; cin >> inputFig;
+		cout << "\t\t\t   Select a figure (* for exit):"; cin >> inputFig;
 
 	top1:
 		if (validateInputFig()) {
@@ -312,7 +334,17 @@ void drawChessTable() {
 }
 
 bool validateInputFig() {
-	if (inputFig.length() != 2)return 0;
+	if (inputFig.length() != 2) {
+		if (inputFig[0] == '*' && inputFig.length() == 1) {
+			gameStarted = 1;
+			inputFig = "";
+			inputPos = "";
+			system("cls");
+			showStartMenu();
+		}
+		else
+			return 0;
+	}
 	else {
 		if (inputFig[0] >= 97 && inputFig[0] <= 122)
 			inputFig[0] = inputFig[0] - 32;
