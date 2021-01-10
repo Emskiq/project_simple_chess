@@ -1,0 +1,566 @@
+﻿/**
+*  
+* Solution to course project # 9
+* Introduction to programming course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2020/2021
+*
+* @author Emil Tsanev
+* @idnumber 62620
+* @compiler VC
+*
+* <The main cpp file>
+*
+*/
+
+#include <iostream>
+#include <cstdlib>
+#include <conio.h>
+#include <stdlib.h>
+#include <Windows.h>
+#include <iomanip>
+#include <string>
+
+using namespace std;
+
+int tableArr[15][15];
+int tableSize = 8, movesCounter = 0;
+string inputFig = "";
+string inputPos = "";
+bool gameStarted = 1, gameWon = 0, gameLost = 0;
+
+
+
+struct king {
+	int x=1, y=1;					//x-row  y-column
+	int possibleXY[8][2] = {};		//possible places to move the king
+	void findPossibleXY() {
+		for (int i = 0; i < 7; i++) {
+			possibleXY[i][0] = 0;			//clear last arr of possibleXY
+			possibleXY[i][1] = 0;
+		}
+		int tempCounter = 0;
+		for (int i = x - 1; i <= x + 1; i++) {
+			for (int j = y - 1; j <= y + 1; j++) {
+				if (i <= tableSize && j != 0 && j <= tableSize) {
+					if (i != x || j != y) {
+						possibleXY[tempCounter][0] = i;					//filling the array
+						possibleXY[tempCounter][1] = j;
+						tempCounter++;
+					}
+				}
+			}
+		}
+	}
+};
+
+king playerKing, compKing;
+
+struct rook {
+	int x=1, y=1;					
+	int possibleXY[31][2] = {};
+	void findPossibleXY(rook anotherRook) {
+		for (int i = 0; i < 30; i++) {
+			possibleXY[i][0] = 0;
+			possibleXY[i][1] = 0;			
+		}
+		if (x != -1) {
+			for (int i = 1; i <= tableSize; i++) {
+				if (i == x)
+					continue;
+				if (((anotherRook.x > i && anotherRook.x < x) || (anotherRook.x < i && anotherRook.x > x))		//this prevents from
+					&& anotherRook.y == y)																		//jumping over figures
+					continue;
+				if (((playerKing.x >= i && playerKing.x < x) || (playerKing.x <= i && playerKing.x > x))
+					&& playerKing.y == y)
+					continue;
+
+				possibleXY[i][0] = i;												//here we change x (rows)
+				possibleXY[i][1] = y;												//from up to down
+			}
+			for (int i = 1; i <= tableSize; i++) {
+				if (i == y)
+					continue;
+				if (((anotherRook.y > i && anotherRook.y < y) || (anotherRook.y < i && anotherRook.y > y))
+					&& anotherRook.x == x)
+					continue;
+				if (((playerKing.y >= i && playerKing.y < y) || (playerKing.y <= i && playerKing.y > y))
+					&& playerKing.x == x)
+					continue;
+
+				possibleXY[i + tableSize][0] = x;
+				possibleXY[i + tableSize][1] = i;									//here we change y(columns)
+			}																		//from left to right
+		}
+	}
+};
+
+rook rook1, rook2;
+
+//defining the functions
+void ChangeTableSize();
+void showStartMenu();
+void drawChessTable();
+void startTheGame();
+bool validateInputFig();
+bool validateInputPos();
+void compMove();
+
+int main()
+{
+	showStartMenu();
+}
+void showStartMenu() {
+	unsigned int inputOption = 0;
+	char c;
+	cout << "  \t           _                    _               _                     " << endl;
+	cout << "  \t          (_)                  | |             | |                    " << endl;
+	cout << "  \t      ___  _  _ __ ___   _ __  | |  ___    ___ | |__    ___  ___  ___ " << endl;
+	cout << "  \t     / __|| || '_ ` _ \\ | '_ \\ | | / _ \\  / __|| '_ \\  / _ \\/ __|/ __|" << endl;
+	cout << "  \t     \\__ \\| || | | | | || |_) || ||  __/ | (__ | | | ||  __/\\__ \\\\__ \\" << endl;
+	cout << "\t     |___/|_||_| |_| |_|| .__/ |_| \\___|  \\___||_| |_| \\___||___/|___/" << endl;
+	cout << "\t   +                    |_|                                           " << endl;
+	cout << "\t  ^^^                                              \t             |_|_|" << endl;
+	cout << "\t  ( )\t\t|=========================================|\t      | | " << endl;
+	cout << "\t  ) (\t\t|1.Start a new game                       |\t      ) (" << endl;
+	cout << setw(50) << "\t (   )\t\t|2.Change table size (current size " << setw(2) << tableSize << "x" << setw(2) << tableSize << ") |\t      ) ( " << endl;
+	cout << "\t  ) (\t\t|3.Exit                                   |\t     (   )" << endl;
+	cout << "\t (   )\t\t|=========================================|\t    [_____]" << endl;
+	cout << "\t[_____]\t\tChoose option 1,2,3:";
+	c = _getche();
+	inputOption = c - '0';
+	switch (inputOption)
+	{
+	case 1: {
+		startTheGame();
+		break;
+	}
+	case 2: {
+		system("cls");
+		ChangeTableSize();
+		break;
+	}
+	case 3: {
+		system("cls");
+		cout << "\n\n\n\n\n\t\t\t\t|========================|" << endl;;
+		cout << "\t\t\t\t| Thank you for playing! |" << endl;
+		cout << "\t\t\t\t|========================|" << endl;
+		Sleep(900);
+		cout << "\n\n\t\t\t\t";
+		system("pause");
+		break;
+	}
+	default: {
+		system("cls");
+		showStartMenu();
+		break;
+	}
+	}
+}
+
+void ChangeTableSize() {				//this is option 2 in menu
+	int tempSize = 0;
+	cout << "\n\n\n\n\n\n \t\t\tChoose a table size between 6-15:";
+	cin >> tempSize;
+	while (tempSize > 15 || tempSize < 6) {
+		system("cls");
+		cout << "\n\n\n\n\n\n \t\t\tPlease choose a number between 6 and 15:";
+		cin >> tempSize;
+	}
+	tableSize = tempSize;
+	system("cls");
+	showStartMenu();
+}
+
+void startTheGame() {		//option 1 in the menu
+	system("cls");
+	int counter = 0;
+	srand(time(0));
+	int temp=rand();
+	playerKing.x =1+(tableSize/2)+ (rand() % (tableSize/2));
+	playerKing.y =1+ (rand() % tableSize);						
+	playerKing.findPossibleXY();
+	while (1) {
+		rook1.x = 1 + (tableSize / 2) + (rand() % (tableSize / 2));
+		rook1.y = 1 + (rand() % tableSize);
+		if (rook1.x != playerKing.x || rook1.y != playerKing.y)break;
+	}
+	rook1.findPossibleXY(rook2);
+	while (1) {
+		rook2.x = 1 + (tableSize / 2) + (rand() % (tableSize / 2));
+		rook2.y = 1 + (rand() % tableSize);
+		if ((rook2.x != playerKing.x || rook2.y != playerKing.y)&&(rook2.x!=rook1.x||rook2.y!=rook1.y))
+			break;
+	}
+	rook2.findPossibleXY(rook1);
+	while (1){
+		counter=0;
+		compKing.x = 1 + (rand() % (tableSize / 2));
+		compKing.y = 1 + (rand() % tableSize);
+		for (int i = 1; i <= tableSize*2; i++) {
+			if (rook1.possibleXY[i][0] == compKing.x) {
+				if (rook1.possibleXY[i][1] == compKing.y) {
+					counter++;
+					break;
+				}
+			}
+		}
+		if (counter == 1)continue;
+		for (int i = 1; i <= tableSize * 2; i++) {
+			if (rook2.possibleXY[i][0] == compKing.x) {
+				if (rook2.possibleXY[i][1] == compKing.y) {
+					counter++;
+					break;
+				}
+			}
+		}
+		if (counter == 1)continue;
+		for (int i = 0; i <= 7; i++) {
+			if (playerKing.possibleXY[i][0] == compKing.x) {
+				if (playerKing.possibleXY[i][1] == compKing.y) {
+					counter++;
+					break;
+				}
+			}
+		}
+		if (counter == 0)break;
+	}
+top:
+	inputFig = "";
+	inputPos = "";
+	rook1.findPossibleXY(rook2);
+	playerKing.findPossibleXY();
+	rook2.findPossibleXY(rook1);
+	drawChessTable();
+	if (!gameStarted) {
+		Sleep(50);
+		compMove();
+		drawChessTable();
+	}
+	gameStarted = 0;
+	if (gameWon) {
+		system("CLS");
+		cout << "\n\n\n\t\t\t\t----=======================----" << endl;
+		cout << "\t\t\t\t Nice! You won after " << movesCounter << " moves!"<<endl;
+		cout << "\t\t\t\t----=======================----" << endl;
+		gameStarted = 1;
+		gameWon = 0;
+		Sleep(1800);
+		system("cls");
+		showStartMenu();
+	}
+	else if (gameLost) {
+		system("CLS");
+		cout << "\n\n\n\t\t\t\t----=======================----" << endl;
+		cout << "\t\t\t\t Yieks! You lost after " << movesCounter << " moves!" << endl;
+		cout << "\t\t\t\t----=======================----" << endl;
+		gameStarted = 1;
+		gameLost = 0;
+		Sleep(1800);
+		system("cls");
+		showStartMenu();
+	}
+	else if (rook1.x==-1&&rook2.x==-1) {
+		system("CLS");
+		cout << "\n\n\n\t\t\t\t----=======================----" << endl;
+		cout << "\t\t\t\t      Equal after " << movesCounter << " moves!" << endl;
+		cout << "\t\t\t\t----=======================----" << endl;
+		gameStarted = 1;
+		Sleep(1800);		
+		system("cls");
+		showStartMenu();
+	}
+
+	else {
+		cout << "\t\t\t   Select a figure (* for exit):"; cin >> inputFig;
+
+	top1:
+		if (validateInputFig()) {
+			cout << "\t\t\t   Select a position:"; cin >> inputPos;
+		top2:
+			if (validateInputPos()) {
+				movesCounter++;
+				goto top;
+			}
+			else {
+				cout << "\t\t\t   Select correct position:"; cin >> inputPos;
+				goto top2;
+			}
+		}
+		else {
+			cout << "\t\t\t   Select correct figure:"; cin >> inputFig;
+			goto top1;
+		}
+	}
+}
+
+void drawChessTable() {
+	system("cls");
+	int i, j;
+	cout << "\t\t\t     " << "A";
+	char c = 66;
+	for (i = 0; i <= tableSize-2; ++i)
+		cout << "    " << char(c + i);
+
+	cout << endl;
+	cout << "\t\t\t  |----|";
+
+	for (i = 2; i <= tableSize; ++i)
+		cout << "----|";
+
+	cout << endl;
+
+	for (i = 1; i <= tableSize; ++i)
+	{
+		cout <<"\t\t\t"<< setw(2) << i << "|";
+
+		for (j = 1; j <= tableSize; ++j) {
+			if (playerKing.x == i && playerKing.y == j)cout << " YK |";
+			else if (compKing.x == i && compKing.y == j)cout << " CK |";
+			else if (rook1.x == i && rook1.y == j)cout << " R1 |";
+			else if (rook2.x == i && rook2.y == j)cout << " R2 |";
+			else cout << "    |";
+		}
+		cout << endl;
+		cout << "\t\t\t -|----";
+
+		for (j = 2; j <= tableSize-1; ++j)
+			cout << "|----";
+
+		cout << "|----|";
+		cout << endl;
+
+	}
+}
+
+bool validateInputFig() {
+	if (inputFig.length() != 2) {
+		if (inputFig[0] == '*' && inputFig.length() == 1) {
+			gameStarted = 1;
+			inputFig = "";
+			inputPos = "";
+			system("cls");
+			showStartMenu();
+		}
+		else
+			return 0;
+	}
+	else {
+		if (inputFig[0] >= 97 && inputFig[0] <= 122)
+			inputFig[0] = inputFig[0] - 32;
+		if (inputFig[1] >= 97 && inputFig[1] <= 122)
+			inputFig[1] = inputFig[1] - 32;
+		
+		if (inputFig == "YK")return true;
+		else if (inputFig == "R1" && rook1.x != -1)return true;
+		else if (inputFig == "R2" && rook2.x != -1)return true;
+		else
+			return false;
+	}
+}
+bool validateInputPos() {
+	int inputX = 0, inputY = 0;
+	if (inputPos.length() > 3)return 0;
+	else {
+		if (inputPos[0] >= 97 && inputPos[0] <= 122)
+			inputPos[0] = inputPos[0] - 32;
+		if (inputPos[1] >= 49 && inputPos[1] < 57 && inputPos[2] == NULL) {
+			inputY = inputPos[0] - '@';
+			inputX = inputPos[1] - '0';
+		}
+		else if (tableSize > 10 && inputPos[1] >= 49 && inputPos[1] < 57 && inputPos[2] >= 49 && inputPos[2] < 57) {
+			inputY = inputPos[0] - '@';
+			inputX = (inputPos[1] - '0') * 10 + (inputPos[2] - '0');
+		}
+		if(inputY>=1&&inputY<=tableSize&&inputX>=1&&inputX<=tableSize){
+			bool moveSucc = 0;
+			if (inputFig == "YK") {
+				for (int i = 0; i <= 7; i++) {
+					if (playerKing.possibleXY[i][0] == inputX) {
+						if (playerKing.possibleXY[i][1] == inputY) {
+							if ((inputX == rook1.x && inputY == rook1.y)
+								||(inputX == rook2.x && inputY == rook2.y))
+								break;
+
+							playerKing.x = inputX;
+							playerKing.y = inputY;
+							moveSucc = 1;
+							break;
+						}
+					}
+				}
+			}
+			else if (inputFig == "R1") {
+				for (int i = 1; i <= tableSize * 2; i++) {
+					if (rook1.possibleXY[i][0] == inputX) {
+						if (rook1.possibleXY[i][1] == inputY) {
+							if ((inputX == playerKing.x && inputY == playerKing.y)
+								|| (inputX == rook2.x && inputY == rook2.y))
+								break;
+
+							rook1.x = inputX;
+							rook1.y = inputY;
+							moveSucc = 1;
+							break;
+						}
+					}
+				}
+			}
+			else if (inputFig == "R2") {
+				for (int i = 1; i <= tableSize * 2; i++) {
+					if (rook2.possibleXY[i][0] == inputX) {
+						if (rook2.possibleXY[i][1] == inputY) {
+							if ((inputX == playerKing.x && inputY == playerKing.y)
+								|| (inputX == rook1.x && inputY == rook1.y))
+								break;
+
+							rook2.x = inputX;
+							rook2.y = inputY;
+							moveSucc = 1;
+							break;
+						}
+					}
+				}
+			}
+			return moveSucc;
+		}
+		else
+			return 0;
+	}
+}
+void compMove() {
+	int choiseCounter = 0;
+	compKing.findPossibleXY();
+	
+	int tempCounter = 0;
+	bool compMove = 0;
+
+	//first check if the king can take a figure
+	for (int i = 0; i <= 7; i++) {
+		if (compKing.possibleXY[i][0] == playerKing.x && compKing.possibleXY[i][1] == playerKing.y) {
+			compKing.possibleXY[i][0] = playerKing.x;
+			compKing.possibleXY[i][1] = playerKing.y;
+			gameLost = 1;
+			compMove = 1;
+			break;
+		}
+	}
+	for (int i = 0; i <= 7; i++) {
+		if (compKing.possibleXY[i][0] == rook1.x && compKing.possibleXY[i][1] == rook1.y) {
+			tempCounter--;
+			for (int j = 1; j <= tableSize * 2; j++) {
+				if (rook1.x == rook2.possibleXY[j][0] && rook1.y == rook2.possibleXY[j][1]) {
+					tempCounter++;
+					break;
+				}
+			}
+			for (int j = 1; j <= 7; j++) {
+				if (rook1.x == playerKing.possibleXY[j][0] && rook1.y == playerKing.possibleXY[j][1]) {
+					tempCounter++;
+					break;
+				}
+			}
+			if (tempCounter >= 0)break;
+		}
+	}
+	if (tempCounter == -1&&!gameLost) {
+		compKing.x = rook1.x;
+		compKing.y = rook1.y;
+		rook1.x = -1;
+		rook1.y = 0;
+		compMove = 1;
+	}
+	else {
+		tempCounter = 0;
+		for (int i = 0; i <= 7; i++) {
+			if (compKing.possibleXY[i][0] == rook2.x && compKing.possibleXY[i][1] == rook2.y) {
+				tempCounter--;
+				for (int j = 1; j <= tableSize * 2; j++) {
+					if (rook2.x == rook1.possibleXY[j][0] && rook2.y == rook1.possibleXY[j][1]) {
+						tempCounter++;
+						break;
+					}
+				}
+				for (int j = 1; j <= 7; j++) {
+					if (rook2.x == playerKing.possibleXY[j][0] && rook2.y == playerKing.possibleXY[j][1]) {
+						tempCounter++;
+						break;
+					}
+				}
+				if (tempCounter >= 0)break;
+			}
+		}
+		if (tempCounter == -1 && !gameLost) {
+			compKing.x = rook2.x;
+			compKing.y = rook2.y;
+			rook2.x = -1;
+			rook2.y = 0;
+			compMove = 1;
+		}
+	}
+	//if not taken figure chek for possible places
+	if (!compMove) {
+		//first you cannot go over a rook
+		for (int i = 0; i <= 7; i++) {
+			if (compKing.possibleXY[i][0] == rook1.x && compKing.possibleXY[i][1] == rook1.y) {
+				compKing.possibleXY[i][0] = 0;
+				compKing.possibleXY[i][1] = 0;
+			}
+			else if (compKing.possibleXY[i][0] == rook2.x && compKing.possibleXY[i][1] == rook2.y) {
+				compKing.possibleXY[i][0] = 0;
+				compKing.possibleXY[i][1] = 0;
+			}
+		}
+		//then check for possible places without check
+		for (int i = 0; i <= 7; i++) {
+			for (int j = 1; j <= tableSize * 2; j++) {
+				if (compKing.possibleXY[i][0] == rook1.possibleXY[j][0] && compKing.possibleXY[i][1] == rook1.possibleXY[j][1]) {
+					compKing.possibleXY[i][0] = 0;
+					compKing.possibleXY[i][1] = 0;
+				}
+			}
+		}
+		for (int i = 0; i <= 7; i++) {
+			for (int j = 1; j <= tableSize * 2; j++) {
+				if (compKing.possibleXY[i][0] == rook2.possibleXY[j][0] && compKing.possibleXY[i][1] == rook2.possibleXY[j][1]) {
+					compKing.possibleXY[i][0] = 0;
+					compKing.possibleXY[i][1] = 0;
+				}
+			}
+		}
+		for (int i = 0; i <= 7; i++) {
+			for (int j = 0; j <= 7; j++) {
+				if (compKing.possibleXY[i][0] == playerKing.possibleXY[j][0] && compKing.possibleXY[i][1] == playerKing.possibleXY[j][1]) {
+					compKing.possibleXY[i][0] = 0;
+					compKing.possibleXY[i][1] = 0;
+				}
+			}
+		}
+
+		for (int i = 0; i <= 7; i++) {
+			if (compKing.possibleXY[i][0] != 0 && compKing.possibleXY[i][1] != 0)
+				choiseCounter++;
+		}
+		if (choiseCounter == 0)
+			gameWon = 1;
+		else {
+			//getting a random movement
+			srand(time(NULL));
+			int temp = 1 + rand() % 7;
+			if (compKing.possibleXY[temp][0] != 0) {
+				compKing.x = compKing.possibleXY[temp][0];
+				compKing.y = compKing.possibleXY[temp][1];
+			}
+			//if not just move to the first possible place
+			else {
+				for (int i = 0; i <= 7; i++) {
+					if (compKing.possibleXY[i][0] != 0) {
+						compKing.x = compKing.possibleXY[i][0];
+						compKing.y = compKing.possibleXY[i][1];
+						break;
+					}
+				}
+			}
+		}
+	}
+}
