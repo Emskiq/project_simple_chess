@@ -27,7 +27,7 @@ int tableArr[15][15];
 int tableSize = 8, movesCounter = 0;
 string inputFig = "";
 string inputPos = "";
-bool gameStarted = 1, gameWon = 0, gameLost = 0;
+bool gameStarted = 1, gameWon = 0, gameLost = 0, forceExit = 0;
 
 
 
@@ -226,6 +226,7 @@ void startTheGame() {		//option 1 in the menu
 		if (counter == 0)break;
 	}
 top:
+	forceExit = 0;
 	inputFig = "";
 	inputPos = "";
 	rook1.findPossibleXY(rook2);
@@ -245,6 +246,7 @@ top:
 		cout << "\t\t\t\t----=======================----" << endl;
 		gameStarted = 1;
 		gameWon = 0;
+		forceExit = 0;
 		Sleep(1800);
 		system("cls");
 		showStartMenu();
@@ -256,6 +258,7 @@ top:
 		cout << "\t\t\t\t----=======================----" << endl;
 		gameStarted = 1;
 		gameLost = 0;
+		forceExit = 0;
 		Sleep(1800);
 		system("cls");
 		showStartMenu();
@@ -266,6 +269,7 @@ top:
 		cout << "\t\t\t\t      Equal after " << movesCounter << " moves!" << endl;
 		cout << "\t\t\t\t----=======================----" << endl;
 		gameStarted = 1;
+		forceExit = 0;
 		Sleep(1800);		
 		system("cls");
 		showStartMenu();
@@ -276,15 +280,22 @@ top:
 
 	top1:
 		if (validateInputFig()) {
-			cout << "\t\t\t   Select a position:"; cin >> inputPos;
-		top2:
-			if (validateInputPos()) {
-				movesCounter++;
-				goto top;
+			if (forceExit) {
+				forceExit = 0;
+				gameStarted = 1;
+				showStartMenu();
 			}
 			else {
-				cout << "\t\t\t   Select correct position:"; cin >> inputPos;
-				goto top2;
+				cout << "\t\t\t   Select a position:"; cin >> inputPos;
+			top2:
+				if (validateInputPos()) {
+					movesCounter++;
+					goto top;
+				}
+				else {
+					cout << "\t\t\t   Select correct position:"; cin >> inputPos;
+					goto top2;
+				}
 			}
 		}
 		else {
@@ -340,7 +351,8 @@ bool validateInputFig() {
 			inputFig = "";
 			inputPos = "";
 			system("cls");
-			showStartMenu();
+			forceExit = 1;
+			return 1;
 		}
 		else
 			return 0;
