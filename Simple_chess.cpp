@@ -112,6 +112,7 @@ int main()
 }
 void showStartMenu() {
 	unsigned int inputOption = 0;
+	movesCounter = 0;
 	char c;
 	cout << "  \t           _                    _               _                     " << endl;
 	cout << "  \t          (_)                  | |             | |                    " << endl;
